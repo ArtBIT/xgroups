@@ -498,7 +498,7 @@ const UIManager = (dataAPI, store) => {
       ],
     })
   );
-  modalManager.register("groupUsers", ({ groupName }, store) =>
+  modalManager.register("groupUsers", (props, store) =>
     createElement({
       tag: "div",
       className: css["groups-form"],
@@ -507,7 +507,7 @@ const UIManager = (dataAPI, store) => {
           tag: "div",
           className: css["group-users-list"],
           style: { overflowY: "auto", maxHeight: "300px" },
-          children: dataAPI.getGroupUsers(groupName).map((username) => ({
+          children: dataAPI.getGroupUsers(props.groupName).map((username) => ({
             tag: "div",
             className: css["group-item"],
             children: [
@@ -523,7 +523,7 @@ const UIManager = (dataAPI, store) => {
                 textContent: "Remove",
                 on: {
                   click: () => {
-                    dataAPI.removeUserFromGroup(username, groupName);
+                    dataAPI.removeUserFromGroup(username, props.groupName);
                   },
                 },
               },
@@ -717,6 +717,19 @@ const UIManager = (dataAPI, store) => {
                   modalManager.open("groupUsers", {
                     groupName: group.name,
                     title: `Users in Group: ${group.name}`,
+                    subtitle: createElement({
+                      tag: "button",
+                      textContent: "Edit",
+                      on: {
+                        click: () =>
+                          modalManager.open("editGroup", {
+                            group,
+                            title: "Edit Group",
+                          }),
+                      },
+                      style: { cursor: "pointer" },
+                      className: css["group-tag-edit"],
+                    }),
                     subtitle: group.description,
                   }),
               },

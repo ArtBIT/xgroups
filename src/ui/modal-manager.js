@@ -1,5 +1,5 @@
 import { createElement, nextTick } from "./utils.js";
-import { Component } from "./components/component.js";
+import { Modal } from "./components/modal.js";
 
 import css from "../xgroups.module.css";
 
@@ -11,88 +11,6 @@ import css from "../xgroups.module.css";
  */
 export const ModalManager = (store) => {
   const modals = new Map();
-
-  /**
-   * Modal Component
-   */
-  class ModalComponent extends Component {
-    render() {
-      const { title, subtitle, children, onClose } = this.props;
-      return createElement({
-        tag: "div",
-        className: css["modal-overlay"],
-        on: {
-          keydown: (e) => e.key === "Escape" && onClose(),
-        },
-        children: [
-          {
-            tag: "div",
-            className: css["modal-window"],
-            children: [
-              {
-                tag: "div",
-                className: css["groups-form"],
-                role: "dialog",
-                "aria-modal": "true",
-                style: { position: "relative" },
-                children: [
-                  {
-                    tag: "div",
-                    className: css["modal-header"],
-                    children: [
-                      {
-                        tag: "h2",
-                        className: css["form-title"],
-                        textContent: title,
-                      },
-                      subtitle && {
-                        tag: "h3",
-                        className: css["form-subtitle"],
-                        textContent: subtitle,
-                      },
-                    ],
-                  },
-                  {
-                    tag: "div",
-                    className: css["modal-content"],
-                    children,
-                  },
-                  {
-                    tag: "button",
-                    textContent: "✖️",
-                    "aria-label": "Close modal",
-                    style: {
-                      position: "absolute",
-                      top: "10px",
-                      right: "10px",
-                    },
-                    on: {
-                      click: onClose,
-                    },
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      });
-    }
-
-    mount(container) {
-      super.mount(container);
-      nextTick(() => {
-        this.element.classList.add(css["active"]);
-      });
-
-      this.element.focus();
-    }
-    unmount() {
-      if (!this.element) return;
-      // Trigger closing animation before removing
-      this.element.classList.remove(css["active"]);
-      setTimeout(super.unmount.bind(this), 200);
-    }
-  }
 
   /**
    * Registers a modal template.
@@ -124,7 +42,7 @@ export const ModalManager = (store) => {
     const template = modals.get(name);
     if (!template) throw new Error(`Modal ${name} not registered`);
     const content = template(props, store);
-    const modal = new ModalComponent(
+    const modal = new Modal(
       {
         modalName: name,
         ...props,
