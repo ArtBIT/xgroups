@@ -73,7 +73,7 @@ const UIManager = (dataAPI, store) => {
                   });
                   const url = URL.createObjectURL(blob);
                   const a = createElement({
-                    nodeName: "a",
+                    tag: "a",
                     href: url,
                     download: "xgroups.json",
                     style: { display: "none" },
