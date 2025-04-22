@@ -44,14 +44,14 @@ const UIManager = (dataAPI, store) => {
         {
           style: {
             display: "flex",
-            justifyContent: "space-between",
+            alignItems: "flex-start",
           },
           // import/export/gist buttons
           children: [
             {
               tag: "button",
               textContent: "Import",
-              className: css["group-btn"],
+              className: css["group-text-btn"],
               on: {
                 click: () => {
                   modalManager.open("importData", {
@@ -64,7 +64,7 @@ const UIManager = (dataAPI, store) => {
             {
               tag: "button",
               textContent: "Export",
-              className: css["group-btn"],
+              className: css["group-text-btn"],
               on: {
                 click: () => {
                   const data = dataAPI.getLocalData();
@@ -88,7 +88,7 @@ const UIManager = (dataAPI, store) => {
             {
               tag: "button",
               textContent: "Sync...",
-              className: css["group-btn"],
+              className: css["group-text-btn"],
               on: {
                 click: () => {
                   modalManager.open("gistSettings", {
@@ -121,37 +121,48 @@ const UIManager = (dataAPI, store) => {
               },
             },
             {
-              tag: "button",
-              textContent: "Edit",
-              on: {
-                click: () => {
-                  // show edit group modal
-                  modalManager.open("editGroup", {
-                    group,
-                    title: "Edit Group",
-                  });
-                },
+              tag: "div",
+              style: {
+                display: "inline-flex",
+                gap: "5px",
               },
-            },
-            {
-              tag: "button",
-              textContent: "Remove",
-              on: {
-                click: () => {
-                  // check if there are any users in the group
-                  const users = dataAPI.getGroupUsers(group.name);
-                  if (users.length > 0) {
-                    if (
-                      !confirm(
-                        `Are you sure you want to remove the group "${group.name}"?`
-                      )
-                    ) {
-                      return;
-                    }
-                  }
-                  dataAPI.removeGroup(group.name);
+              children: [
+                {
+                  tag: "button",
+                  textContent: "Edit",
+                  className: css["group-text-btn"],
+                  on: {
+                    click: () => {
+                      // show edit group modal
+                      modalManager.open("editGroup", {
+                        group,
+                        title: "Edit Group",
+                      });
+                    },
+                  },
                 },
-              },
+                {
+                  tag: "button",
+                  textContent: "Remove",
+                  className: css["group-text-btn"],
+                  on: {
+                    click: () => {
+                      // check if there are any users in the group
+                      const users = dataAPI.getGroupUsers(group.name);
+                      if (users.length > 0) {
+                        if (
+                          !confirm(
+                            `Are you sure you want to remove the group "${group.name}"?`
+                          )
+                        ) {
+                          return;
+                        }
+                      }
+                      dataAPI.removeGroup(group.name);
+                    },
+                  },
+                },
+              ],
             },
           ],
         })),
@@ -521,6 +532,7 @@ const UIManager = (dataAPI, store) => {
               {
                 tag: "button",
                 textContent: "Remove",
+                className: css["group-text-btn"],
                 on: {
                   click: () => {
                     dataAPI.removeUserFromGroup(username, props.groupName);

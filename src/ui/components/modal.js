@@ -1,4 +1,4 @@
-import { createElement } from "../utils.js";
+import { createElement, nextTick } from "../utils.js";
 import { Component } from "./component.js";
 
 import css from "../../xgroups.module.css";
