@@ -5,7 +5,7 @@ const packageJsonPath = path.join(__dirname, "package.json");
 const packageJson = require(packageJsonPath);
 const headerFile = path.join(__dirname, "tampermonkey-header.js");
 const inputFile = path.join(__dirname, "dist", "xgroups.min.js");
-const outputFile = path.join(__dirname, "dist", "xgroups.js");
+const outputFile = path.join(__dirname, "dist", "xgroups.userscript.js");
 
 const bumpVersion = (version) => {
   const parts = version.split(".");

@@ -6,11 +6,12 @@
 // @copyright    2025+ Djordje Ungar
 // @version      1.0.0
 // @source       https://github.com/artbit/xgroups
-// @updateURL    https://raw.githubusercontent.com/artbit/xgroups/main/dist/xgroups.js
-// @downloadURL  https://raw.githubusercontent.com/artbit/xgroups/main/dist/xgroups.js
+// @updateURL    https://raw.githubusercontent.com/artbit/xgroups/main/dist/xgroups.userscript.js
+// @downloadURL  https://raw.githubusercontent.com/artbit/xgroups/main/dist/xgroups.userscript.js
 // @match        https://x.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=x.com
 // @tag          productivity
+// @run-at       document-idle
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_xmlhttpRequest

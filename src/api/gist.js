@@ -20,6 +20,7 @@ export const GistAPI = (function () {
         url: GIST_API_URL,
         method: "POST",
         headers: headers(),
+        nocache: true,
         data: JSON.stringify({
           description: "X.com User Group Tagger Data",
           public: false,
@@ -55,6 +56,7 @@ export const GistAPI = (function () {
       GM_xmlhttpRequest({
         url: `${GIST_API_URL}/${gistId}`,
         headers: headers(),
+        nocache: true,
         onload: (raw) => {
           let response;
           try {
@@ -81,7 +83,8 @@ export const GistAPI = (function () {
         url: `${GIST_API_URL}/${gistId}`,
         method: "PATCH",
         headers: headers(),
-        body: JSON.stringify({
+        nocache: true,
+        data: JSON.stringify({
           files: {
             "xgroups_data.json": {
               content: JSON.stringify(data, null, 2),
@@ -96,8 +99,11 @@ export const GistAPI = (function () {
             reject(e);
           }
 
-          if (raw.status !== 200) reject(new Error("Failed to update Gist"));
-          resolve(response.id);
+          if (raw.status !== 200) {
+            reject(new Error("Failed to update Gist"));
+          }
+
+          resolve(gistId);
         },
       });
     });

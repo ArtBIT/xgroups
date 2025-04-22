@@ -196,7 +196,7 @@ export const DataAPI = (store) => {
   const syncWithGist = async () => {
     if (!GistAPI.getToken() || !GistAPI.getGistId()) return;
     try {
-      await retry(async () => {
+      return await retry(async () => {
         const localData = getLocalData();
         const localTimestamp = parseInt(localData.timestamp || "0", 10);
         const gistData = await GistAPI.readGist(GistAPI.getGistId());
@@ -242,8 +242,13 @@ export const DataAPI = (store) => {
     }
   };
 
+  const getGroups = () => store.getState().groups;
+  const getGroup = (name) =>
+    store.getState().groups.find((g) => g.name === name);
+
   return {
-    getGroups: () => store.getState().groups,
+    getGroups,
+    getGroup,
     addGroup: (name, description = "", bgColor = "#777", fgColor = "#fff") => {
       const group = { name, description, bgColor, fgColor };
       store.setState({
@@ -253,10 +258,6 @@ export const DataAPI = (store) => {
       return group;
     },
     removeGroup: (name) => {
-      store.setState({
-        groups: store.getState().groups.filter((g) => g.name !== name),
-      });
-      saveGroups();
       // remove group from all users
       const userGroups = store.getState().userGroups;
       Object.keys(userGroups).forEach((username) => {
@@ -264,7 +265,45 @@ export const DataAPI = (store) => {
         if (userGroups[username].size === 0) delete userGroups[username];
       });
       store.setState({ userGroups: { ...userGroups } });
+      saveGroups();
       saveUserGroups();
+      store.setState({
+        groups: store.getState().groups.filter((g) => g.name !== name),
+        userGroups: { ...userGroups },
+      });
+    },
+    updateGroup: (name, newName, description, bgColor, fgColor) => {
+      if (name !== newName && getGroup(newName)) {
+        showNotification({ text: "Group with this name already exists." });
+        return;
+      }
+
+      const groups = getGroups();
+      const groupIndex = groups.findIndex((g) => g.name === name);
+      if (groupIndex === -1) return;
+
+      const group = {
+        ...groups[groupIndex],
+        name: newName,
+        description,
+        bgColor,
+        fgColor,
+      };
+      groups[groupIndex] = group;
+      store.setState({ groups });
+      saveGroups();
+      if (name !== newName) {
+        // update user groups
+        const userGroups = store.getState().userGroups;
+        Object.keys(userGroups).forEach((username) => {
+          if (userGroups[username].has(name)) {
+            userGroups[username].delete(name);
+            userGroups[username].add(newName);
+          }
+        });
+        store.setState({ userGroups: { ...userGroups } });
+        saveUserGroups();
+      }
     },
     getUserGroups: (username) =>
       Array.from(

@@ -10,7 +10,7 @@ Install the TamperMonkey extension for your browser:
  - Edge: [Install Link](https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd)
 
 Then install the script from this repo.
-[Link](https://github.com/artbit/xgroups/raw/master/dist/xgroups.js)
+[Link](https://github.com/artbit/xgroups/raw/master/dist/xgroups.userscript.js)
 
 # Build manually
  - Clone this repository

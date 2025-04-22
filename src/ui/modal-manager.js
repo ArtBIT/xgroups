@@ -44,8 +44,8 @@ export const ModalManager = (store) => {
     const content = template(props, store);
     const modal = new Modal(
       {
-        modalName: name,
         ...props,
+        modalName: name,
         children: [content],
         onClose: () => close(),
       },

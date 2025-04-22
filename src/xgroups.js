@@ -99,73 +99,94 @@ const UIManager = (dataAPI, store) => {
             },
           ],
         },
-        ...store.getState().groups.map((group) => ({
+        {
           tag: "div",
-          className: css["group-item"],
+          style: {
+            overflowY: "auto",
+            maxHeight: "300px",
+          },
           children: [
-            {
-              tag: "button",
-              textContent: `${group.name} (${
-                dataAPI.getGroupUsers(group.name).length
-              })`,
-              title: group.description,
-              on: {
-                click: () => {
-                  // show edit group modal
-                  modalManager.open("groupUsers", {
-                    groupName: group.name,
-                    title: `Users in Group: ${group.name}`,
-                    subtitle: group.description,
-                  });
-                },
-              },
-            },
-            {
+            ...store.getState().groups.map((group) => ({
               tag: "div",
-              style: {
-                display: "inline-flex",
-                gap: "5px",
-              },
+              className: css["group-item"],
               children: [
                 {
                   tag: "button",
-                  textContent: "Edit",
-                  className: css["group-text-btn"],
+                  textContent: `${group.name} (${
+                    dataAPI.getGroupUsers(group.name).length
+                  })`,
+                  title: group.description,
                   on: {
                     click: () => {
                       // show edit group modal
-                      modalManager.open("editGroup", {
-                        group,
-                        title: "Edit Group",
+                      modalManager.open("groupUsers", {
+                        groupName: group.name,
+                        title: `Users in Group: ${group.name}`,
+                        subtitle: createElement({
+                          tag: "button",
+                          textContent: "Edit",
+                          on: {
+                            click: () =>
+                              modalManager.open("editGroup", {
+                                group,
+                                title: "Edit Group",
+                              }),
+                          },
+                          style: { cursor: "pointer" },
+                          className: css["group-tag-edit"],
+                        }),
                       });
                     },
                   },
                 },
                 {
-                  tag: "button",
-                  textContent: "Remove",
-                  className: css["group-text-btn"],
-                  on: {
-                    click: () => {
-                      // check if there are any users in the group
-                      const users = dataAPI.getGroupUsers(group.name);
-                      if (users.length > 0) {
-                        if (
-                          !confirm(
-                            `Are you sure you want to remove the group "${group.name}"?`
-                          )
-                        ) {
-                          return;
-                        }
-                      }
-                      dataAPI.removeGroup(group.name);
-                    },
+                  tag: "div",
+                  style: {
+                    display: "inline-flex",
+                    gap: "5px",
                   },
+                  children: [
+                    {
+                      tag: "button",
+                      textContent: "Edit",
+                      className: css["group-text-btn"],
+                      on: {
+                        click: () => {
+                          // show edit group modal
+                          modalManager.open("editGroup", {
+                            group,
+                            title: "Edit Group",
+                          });
+                        },
+                      },
+                    },
+                    {
+                      tag: "button",
+                      textContent: "Remove",
+                      className: css["group-text-btn"],
+                      on: {
+                        click: () => {
+                          // check if there are any users in the group
+                          const users = dataAPI.getGroupUsers(group.name);
+                          if (users.length > 0) {
+                            if (
+                              !confirm(
+                                `Are you sure you want to remove the group "${group.name}"?`
+                              )
+                            ) {
+                              return;
+                            }
+                          }
+                          dataAPI.removeGroup(group.name);
+                        },
+                      },
+                    },
+                  ],
                 },
               ],
-            },
+            })),
           ],
-        })),
+        },
         {
           tag: "button",
           textContent: "Add Group",
@@ -359,8 +380,8 @@ const UIManager = (dataAPI, store) => {
           const bgColor = e.target.elements.bgColor.value;
           const fgColor = e.target.elements.fgColor.value;
           if (name) {
-            dataAPI.removeGroup(group.name);
-            dataAPI.addGroup(name, description, bgColor, fgColor);
+            const oldName = group.name;
+            dataAPI.updateGroup(oldName, name, description, bgColor, fgColor);
             modalManager.close();
           } else {
             showNotification({ text: "Please enter a group name." });
@@ -742,7 +763,6 @@ const UIManager = (dataAPI, store) => {
                       style: { cursor: "pointer" },
                       className: css["group-tag-edit"],
                     }),
-                    subtitle: group.description,
                   }),
               },
             });
@@ -784,24 +804,27 @@ const UIManager = (dataAPI, store) => {
   /**
    * Updates group tags on tweets.
    */
+  const updateTweetGroupTags = (tweet) => {
+    const usernameLink =
+      tweet.querySelector(config.usernameSelector) ||
+      tweet.querySelector(config.usernameLinkSelector);
+    if (!usernameLink) return;
+
+    const username = dataAPI.normalizeUsername(usernameLink.textContent);
+    const avatarContainer = tweet.querySelector(config.avatarSelector);
+    if (!avatarContainer) return;
+
+    const existingTags = avatarContainer.querySelector(`.${css["group-tags"]}`);
+    if (existingTags) existingTags.remove();
+    const groupTags = new GroupTags({ username }, store);
+    groupTags.mount(avatarContainer);
+  };
+
   const updateGroupTags = () => {
     observe = false;
+    console.log("Updating group tags...");
     const tweets = document.querySelectorAll(config.tweetSelector);
-    tweets.forEach((tweet) => {
-      const usernameLink =
-        tweet.querySelector(config.usernameSelector) ||
-        tweet.querySelector('a[href^="/"][role="link"] span');
-      if (!usernameLink) return;
-      const username = dataAPI.normalizeUsername(usernameLink.textContent);
-      const avatarContainer = tweet.querySelector(config.avatarSelector);
-      if (!avatarContainer) return;
-      const existingTags = avatarContainer.querySelector(
-        `.${css["group-tags"]}`
-      );
-      if (existingTags) existingTags.remove();
-      const groupTags = new GroupTags({ username }, store);
-      groupTags.mount(avatarContainer);
-    });
+    tweets.forEach(updateTweetGroupTags);
     setTimeout(() => {
       observe = true;
     }, 1);
@@ -837,13 +860,16 @@ const UIManager = (dataAPI, store) => {
 
   // Initialize
   initGroupManager();
-  updateGroupTags();
   dataAPI.syncWithGist();
 
   const debouncedUpdateGroupTags = debounce(updateGroupTags, 100);
+  debouncedUpdateGroupTags();
   // Observe DOM changes
-  const observer = new MutationObserver(() => {
-    if (observe) debouncedUpdateGroupTags();
+  const observer = new MutationObserver((mutationList) => {
+    if (!observe) return;
+    mutationList.forEach((mutation) => {
+      Array.from(mutation.addedNodes).forEach(updateTweetGroupTags);
+    });
   });
   observer.observe(document.body, { childList: true, subtree: true });
 
