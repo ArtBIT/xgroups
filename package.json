@@ -1,0 +1,15 @@
+{
+  "name": "xgroups",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build-vite && npm run build-minify && npm run build-tampermonkey",
+    "build-vite": "vite build",
+    "build-tampermonkey": "node build-tampermonkey.js",
+    "build-minify": "uglifyjs dist/xgroups.iife.js -o dist/xgroups.min.js --compress --mangle --comments"
+  },
+  "devDependencies": {
+    "uglify-js": "^3.19.3",
+    "vite": "^5.0.0"
+  }
+}
