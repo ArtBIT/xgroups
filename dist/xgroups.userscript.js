@@ -4,10 +4,10 @@
 // @namespace    https://github.com/artbit/xgroups
 // @author       Djordje Ungar
 // @copyright    2025+ Djordje Ungar
-// @version      1.0.83
+// @version      1.0.84
 // @source       https://github.com/artbit/xgroups
-// @updateURL    https://raw.githubusercontent.com/artbit/xgroups/main/dist/xgroups.userscript.js
-// @downloadURL  https://raw.githubusercontent.com/artbit/xgroups/main/dist/xgroups.userscript.js
+// @updateURL    https://raw.githubusercontent.com/ArtBIT/xgroups/refs/heads/main/dist/xgroups.userscript.js
+// @downloadURL  https://raw.githubusercontent.com/ArtBIT/xgroups/refs/heads/main/dist/xgroups.userscript.js
 // @match        https://x.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=x.com
 // @tag          productivity
