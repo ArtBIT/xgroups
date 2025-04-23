@@ -4,7 +4,7 @@
 XGroups is a [TamperMonkey](https://www.tampermonkey.net/) script, that allows you to organize user to groups, and to show group indicators bellow the user avatars.
 
 # Demo
-https:://raw.githubusercontent.com/ArtBIT/xgroups/master/demo/demo.mp4
+https://github.com/user-attachments/assets/0c28e9d7-db61-4cb2-8788-e3683a8b65f0
 
 # Installation
 Install the TamperMonkey extension for your browser:
@@ -23,3 +23,7 @@ Then install the script from this repo.
 # License
 
 [MIT](LICENSE.md)
+
+
+
+
