@@ -1,4 +1,4 @@
-import { createElement } from "../utils.js";
+import { createElement, updateDOM } from "../utils.js";
 /**
  * Base Component class for UI elements.
  */
@@ -58,8 +58,7 @@ export class Component {
   update() {
     if (!this.element) return;
     const newElement = this.render();
-    this.element.replaceWith(newElement);
-    this.element = newElement;
+    updateDOM(this.element, newElement);
   }
 
   /**
