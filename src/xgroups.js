@@ -836,6 +836,7 @@ const UIManager = (dataAPI, store) => {
    * Updates group tags on tweets.
    */
   const updateTweetGroupTags = (tweet) => {
+    if (!tweet) return;
     const usernameLink =
       tweet.querySelector(config.usernameSelector) ||
       tweet.querySelector(config.usernameLinkSelector);
