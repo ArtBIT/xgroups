@@ -7,11 +7,11 @@
   --xgroups-ui-primary: #eff3f4;
   --xgroups-border-radius: 24px;
 }
-.form-element {
+.xgroups .form-element {
   position: relative;
   margin-top: 28px;
 }
-.form-input {
+.xgroups .form-input {
   background: var(--xgroups-background-secondary);
   color: var(--xgroups-typography-primary);
   border: 0;
@@ -20,23 +20,23 @@
   min-height: 50px;
   width: 100%;
 }
-.group-circle-btn:hover {
+.xgroups .group-circle-btn:hover {
   background: var(--xgroups-background-secondary);
 }
-.group-tags {
+.xgroups.group-tags {
   margin-top: 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-.group-tag {
+.xgroups .group-tag {
   border-radius: 4px;
   padding: 2px 6px;
   margin-bottom: 2px;
   font-size: 16px;
   cursor: pointer;
 }
-.group-tags-btns {
+.xgroups .group-tags-btns {
   gap: 5px;
   border-top: 1px solid var(--xgroups-background-secondary);
   padding-top: 5px;
@@ -46,19 +46,19 @@
 article[data-testid="tweet"]:hover .group-tags-btns {
   visibility: visible;
 }
-.group-item {
+.xgroups .group-item {
   display: flex;
   gap: 8px;
   justify-content: space-between;
   padding: 0 8px;
 }
-.group-item:hover {
+.xgroups .group-item:hover {
   background: var(--xgroups-background-secondary);
 }
 
 /* MODALS */
 
-.modal-overlay {
+.xgroups.modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -70,7 +70,7 @@ article[data-testid="tweet"]:hover .group-tags-btns {
   align-items: center;
   justify-content: center;
 }
-.modal-window {
+.xgroups .modal-window {
   color: var(--xgroups-typography-primary);
   background: var(--xgroups-background-primary);
   border: none;
@@ -80,39 +80,44 @@ article[data-testid="tweet"]:hover .group-tags-btns {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   border-radius: var(--xgroups-border-radius);
 }
-.modal-header {
+.xgroups .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 10px;
   flex-direction: column;
 }
-.modal-header .form-title {
+.xgroups .modal-header .form-title {
   font-size: 20px;
   margin: 0;
 }
-.modal-header .form-subtitle {
+.xgroups .modal-header .form-subtitle {
   font-size: 14px;
   color: #aaa;
   margin: 0;
 }
-.modal-overlay {
+.xgroups .modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.xgroups.modal-overlay {
   opacity: 0;
   transition: opacity 200ms ease-in-out;
 }
-.modal-overlay.active {
+.xgroups.modal-overlay.active {
   opacity: 1;
 }
-.modal-window {
+.xgroups.modal-overlay.active .modal-window {
+  transform: scale(1);
+}
+.xgroups .modal-window {
   transform: scale(0.8);
   transition: transform 200ms ease-in-out;
 }
-.modal-overlay.active .modal-window {
-  transform: scale(1);
-}
 
-.groups-form input[type="submit"],
-.group-btn {
+.xgroups input[type="submit"],
+.xgroups .group-btn {
   background-color: var(--xgroups-ui-primary);
   color: var(--xgroups-typography-inverted);
   border-radius: 12px;
@@ -125,14 +130,7 @@ article[data-testid="tweet"]:hover .group-tags-btns {
   outline: 0;
   text-align: center;
 }
-.group-circle-btn {
-  width: 42px;
-  height: 42px;
-  background: var(--xgroups-background-primary);
-  border-radius: 42px;
-  padding: 8px;
-}
-.group-text-btn {
+.xgroups .text-btn {
   background-color: none;
   color: var(--xgroups-typography-secondary);
   border-radius: 12px;
@@ -145,11 +143,11 @@ article[data-testid="tweet"]:hover .group-tags-btns {
   outline: 0;
   text-align: center;
 }
-.group-text-btn:hover {
+.xgroups .text-btn:hover {
   color: var(--xgroups-typography-primary);
   text-decoration: underline;
 }
-.groups-form {
+.xgroups form {
   padding: 0px;
   display: flex;
   flex-direction: column;
@@ -158,39 +156,46 @@ article[data-testid="tweet"]:hover .group-tags-btns {
   border-radius: var(--xgroups-border-radius);
   box-sizing: border-box;
 }
-.groups-form .form-title {
+.xgroups .form-title {
   color: var(--xgroups-typography-primary);
   font-family: sans-serif;
   font-size: 24px;
   font-weight: 600;
 }
-.groups-form select {
+.xgroups .form-footer {
+  color: var(--xgroups-typography-secondary);
+  font-family: sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  margin-top: 10px;
+}
+.xgroups select {
   padding: 12px;
   border-radius: var(--xgroups-border-radius);
   background: var(--xgroups-background-secondary);
 }
-.groups-form .form-subtitle {
+.xgroups .form-subtitle {
   color: var(--xgroups-typography-primary);
   font-family: sans-serif;
   font-size: 16px;
   font-weight: 600;
   margin-top: 10px;
 }
-.groups-form .form-element {
+.xgroups .form-element {
   min-height: 50px;
   height: auto;
   position: relative;
   width: 100%;
   margin-top: 28px;
 }
-.groups-form .divider {
+.xgroups .divider {
   width: 100%;
   height: 1px;
   background-color: var(--xgroups-background-secondary);
   margin: 20px 0;
 }
-.groups-form .form-input,
-.groups-form input {
+.xgroups .form-input,
+.xgroups input {
   color: var(--xgroups-typography-primary);
   background-color: var(--xgroups-background-secondary);
   border-radius: var(--xgroups-border-radius);
@@ -203,19 +208,19 @@ article[data-testid="tweet"]:hover .group-tags-btns {
   padding: 4px 20px;
   width: 100%;
 }
-.groups-form input[type="color"] {
+.xgroups input[type="color"] {
   -webkit-appearance: none;
   width: 100%;
   height: 50px;
 }
-.groups-form input[type="color"],
-.groups-form input[type="color"]::-webkit-color-swatch,
-.groups-form input[type="color"]::-webkit-color-swatch-wrapper {
+.xgroups input[type="color"],
+.xgroups input[type="color"]::-webkit-color-swatch,
+.xgroups input[type="color"]::-webkit-color-swatch-wrapper {
   border: none;
   border-radius: var(--xgroups-border-radius);
   padding: 0;
 }
-.groups-form .label-bg {
+.xgroups .label-bg {
   background-color: var(--xgroups-background-primary);
   border-radius: 10px;
   padding: 4px 10px;
@@ -227,12 +232,12 @@ article[data-testid="tweet"]:hover .group-tags-btns {
   transition: transform 200ms;
   color: transparent;
 }
-.groups-form .form-input.focus ~ .label-bg,
-.groups-form input:focus ~ .label-bg,
-.groups-form input:not(:placeholder-shown) ~ .label-bg {
+.xgroups .form-input.focus ~ .label-bg,
+.xgroups input:focus ~ .label-bg,
+.xgroups input:not(:placeholder-shown) ~ .label-bg {
   transform: translateY(14px);
 }
-.groups-form .placeholder {
+.xgroups .placeholder {
   color: var(--xgroups-typography-secondary);
   position: absolute;
   top: 20px;
@@ -244,25 +249,25 @@ article[data-testid="tweet"]:hover .group-tags-btns {
     color 200ms;
   transform: scale(1.2);
 }
-.groups-form .label-bg,
-.groups-form .placeholder {
+.xgroups .label-bg,
+.xgroups .placeholder {
   font-family: sans-serif;
   font-size: 14px;
   line-height: 14px;
 }
-.groups-form .form-input.focus ~ .placeholder,
-.groups-form .form-input .placeholder-shown,
-.groups-form input:focus ~ .placeholder,
-.groups-form input:not(:placeholder-shown) ~ .placeholder {
+.xgroups .form-input.focus ~ .placeholder,
+.xgroups .form-input .placeholder-shown,
+.xgroups input:focus ~ .placeholder,
+.xgroups input:not(:placeholder-shown) ~ .placeholder {
   transform: translateY(-34px) translateX(9px) scale(1);
 }
-.groups-form input:not(:placeholder-shown) ~ .placeholder {
+.xgroups input:not(:placeholder-shown) ~ .placeholder {
   color: var(--xgroups-typography-secondary);
 }
-.groups-form input:focus ~ .placeholder {
+.xgroups input:focus ~ .placeholder {
   color: var(--xgroups-typography-tertiary);
 }
-.groups-form .submit {
+.xgroups .submit {
   background-color: var(--xgroups-ui-primary);
   color: var(--xgroups-typography-primary);
   border-radius: 12px;
@@ -276,6 +281,45 @@ article[data-testid="tweet"]:hover .group-tags-btns {
   text-align: center;
   width: 100%;
 }
-.groups-form .submit:active {
+.xgroups .submit:active {
   background-color: var(--xgroups-ui-secondary);
+}
+.xgroups .loading-spinner {
+  position: relative;
+  display: inline-block;
+  top: 6px;
+  width: 24px;
+  height: 24px;
+  margin: 0 auto;
+  animation: spin 1s linear infinite;
+}
+.xgroups .loading-spinner-inner {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  top: 0;
+  left: 0;
+  background-color: var(--xgroups-ui-primary);
+  border-radius: 100% 0 0 0;
+}
+.xgroups .loading-spinner-cutout {
+  width: 50%;
+  height: 50%;
+  background-color: var(--xgroups-background-primary);
+  position: absolute;
+  top: 25%;
+  left: 25%;
+  border-radius: 50%;
+  pointer-events: none;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.xgroups .hidden {
+  display: none;
 }

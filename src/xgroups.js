@@ -10,6 +10,7 @@ import {
   Dropdown,
   SVGButton,
   ModalManager,
+  LoadingSpinner,
   showNotification,
 } from "./ui";
 
@@ -311,7 +312,9 @@ const UIManager = (dataAPI, store) => {
               textContent: "Sync Now",
               on: {
                 click: async () => {
+                  store.setState({ loading: true });
                   const id = await dataAPI.syncWithGist();
+                  store.setState({ loading: false });
                   if (id) {
                     showNotification({
                       text: `Gist updated: https://gist.github.com/${id}`,
@@ -321,6 +324,10 @@ const UIManager = (dataAPI, store) => {
                   }
                 },
               },
+            },
+            {
+              tag: "span",
+              children: [new LoadingSpinner({}, store)],
             },
           ],
         }),
