@@ -25,6 +25,7 @@ export const DataAPI = (store) => {
     try {
       const groups = store.getState().groups;
       if (JSON.stringify(groups) !== JSON.stringify(localStorageCache.groups)) {
+        // only store value if it has changed
         GM_setValue(GROUPS_KEY, JSON.stringify(groups));
         updateTimestamp();
         localStorageCache.groups = groups;
@@ -166,6 +167,7 @@ export const DataAPI = (store) => {
       if (
         JSON.stringify(users) !== JSON.stringify(localStorageCache.userGroups)
       ) {
+        // only store value if it has changed
         GM_setValue(USER_GROUPS_KEY, JSON.stringify(users));
         updateTimestamp();
         localStorageCache.userGroups = users;
@@ -264,13 +266,12 @@ export const DataAPI = (store) => {
         userGroups[username].delete(name);
         if (userGroups[username].size === 0) delete userGroups[username];
       });
-      store.setState({ userGroups: { ...userGroups } });
-      saveGroups();
-      saveUserGroups();
       store.setState({
         groups: store.getState().groups.filter((g) => g.name !== name),
         userGroups: { ...userGroups },
       });
+      saveGroups();
+      saveUserGroups();
     },
     updateGroup: (name, newName, description, bgColor, fgColor) => {
       if (name !== newName && getGroup(newName)) {
