@@ -51,7 +51,8 @@ const UIManager = (dataAPI, store) => {
           children: [
             {
               tag: "button",
-              textContent: "Import",
+              title: "Import groups from JSON",
+              textContent: "Import...",
               className: css["text-btn"],
               on: {
                 click: () => {
@@ -64,6 +65,7 @@ const UIManager = (dataAPI, store) => {
             },
             {
               tag: "button",
+              title: "Export groups to JSON",
               textContent: "Export",
               className: css["text-btn"],
               on: {
@@ -88,6 +90,7 @@ const UIManager = (dataAPI, store) => {
             },
             {
               tag: "button",
+              title: "Sync with Gist",
               textContent: "Sync...",
               className: css["text-btn"],
               on: {
@@ -164,6 +167,7 @@ const UIManager = (dataAPI, store) => {
                       tag: "button",
                       textContent: "Remove",
                       className: css["text-btn"],
+                      title: "Remove group",
                       on: {
                         click: () => {
                           // check if there are any users in the group
@@ -559,6 +563,7 @@ const UIManager = (dataAPI, store) => {
                 tag: "button",
                 textContent: "Remove",
                 className: css["text-btn"],
+                title: "Remove user from group",
                 on: {
                   click: () => {
                     dataAPI.removeUserFromGroup(username, props.groupName);
@@ -735,6 +740,7 @@ const UIManager = (dataAPI, store) => {
               tag: "button",
               type: "submit",
               name: "remove",
+              title: "Remove user from group",
               className: css["group-btn"],
               textContent: "Remove",
             },
@@ -793,8 +799,10 @@ const UIManager = (dataAPI, store) => {
             children: [
               {
                 tag: "button",
+                textContent: "+",
                 textContent: "➕",
-                "aria-label": "+ Add user to group",
+                title: "Add user to group",
+                "aria-label": "Add user to group",
                 on: {
                   click: () =>
                     modalManager.open("assignUser", {
@@ -805,7 +813,9 @@ const UIManager = (dataAPI, store) => {
               },
               {
                 tag: "button",
+                textContent: "-",
                 textContent: "➖",
+                title: "Remove user from group",
                 "aria-label": "- Remove user from group",
                 on: {
                   click: () =>
@@ -857,6 +867,7 @@ const UIManager = (dataAPI, store) => {
   const initGroupManager = () => {
     const button = new SVGButton(
       {
+        title: "Manage XGroups",
         svg: SVG.groups,
         style: {
           position: "fixed",
@@ -864,7 +875,6 @@ const UIManager = (dataAPI, store) => {
           right: "10px",
           width: "24px",
           height: "24px",
-          fill: "var(--xgroups-ui-primary)",
           zIndex: 1001,
         },
         on: {

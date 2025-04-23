@@ -23,6 +23,13 @@
 .xgroups .group-circle-btn:hover {
   background: var(--xgroups-background-secondary);
 }
+.xgroups-svg-btn {
+  fill: var(--xgroups-typography-secondary);
+  transition: fill 200ms;
+}
+.xgroups-svg-btn:hover {
+  fill: var(--xgroups-typography-primary);
+}
 .xgroups.group-tags {
   margin-top: 5px;
   display: flex;
@@ -38,7 +45,12 @@
 }
 .xgroups .group-tags-btns {
   gap: 5px;
-  border-top: 1px solid var(--xgroups-background-secondary);
+  /* add gradient fallof from the top */
+  background: linear-gradient(
+    to bottom,
+    var(--xgroups-background-primary) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
   padding-top: 5px;
   margin-top: 5px;
   visibility: hidden;

@@ -5,14 +5,13 @@ import css from "../../xgroups.module.css";
 
 export class SVGButton extends Component {
   render() {
-    const { on, svg, style, label = "", ariaLabel } = this.props;
+    const { svg, label = "", ariaLabel, ...props } = this.props;
 
     return createElement({
+      ...props,
       tag: "div",
       role: "button",
-      className: css["xgroups-button"],
-      on,
-      style,
+      className: css["xgroups-svg-btn"],
       "aria-label": ariaLabel || label,
       children: [
         {
