@@ -1,5 +1,5 @@
 import { config } from "./config.js";
-import { debounce } from "./utils.js";
+import { debounce, classnames } from "./utils.js";
 import { SVG } from "./svg.js";
 import { Store } from "./store.js";
 import { DataAPI } from "./api/data.js";
@@ -40,7 +40,7 @@ const UIManager = (dataAPI, store) => {
   modalManager.register("groupManager", (props, store) =>
     createElement({
       tag: "div",
-      className: css["groups-form"],
+      className: css["xgroups"],
       children: [
         {
           style: {
@@ -52,7 +52,7 @@ const UIManager = (dataAPI, store) => {
             {
               tag: "button",
               textContent: "Import",
-              className: css["group-text-btn"],
+              className: css["text-btn"],
               on: {
                 click: () => {
                   modalManager.open("importData", {
@@ -65,10 +65,10 @@ const UIManager = (dataAPI, store) => {
             {
               tag: "button",
               textContent: "Export",
-              className: css["group-text-btn"],
+              className: css["text-btn"],
               on: {
                 click: () => {
-                  const data = dataAPI.getLocalData();
+                  const data = JSON.stringify(dataAPI.getLocalData());
                   const blob = new Blob([data], {
                     type: "application/json",
                   });
@@ -89,7 +89,7 @@ const UIManager = (dataAPI, store) => {
             {
               tag: "button",
               textContent: "Sync...",
-              className: css["group-text-btn"],
+              className: css["text-btn"],
               on: {
                 click: () => {
                   modalManager.open("gistSettings", {
@@ -125,7 +125,8 @@ const UIManager = (dataAPI, store) => {
                         title: `Users in Group: ${group.name}`,
                         subtitle: createElement({
                           tag: "button",
-                          textContent: "Edit",
+                          textContent: "Edit group...",
+                          className: css["text-btn"],
                           on: {
                             click: () =>
                               modalManager.open("editGroup", {
@@ -133,8 +134,6 @@ const UIManager = (dataAPI, store) => {
                                 title: "Edit Group",
                               }),
                           },
-                          style: { cursor: "pointer" },
-                          className: css["group-tag-edit"],
                         }),
                       });
                     },
@@ -150,7 +149,7 @@ const UIManager = (dataAPI, store) => {
                     {
                       tag: "button",
                       textContent: "Edit",
-                      className: css["group-text-btn"],
+                      className: css["text-btn"],
                       on: {
                         click: () => {
                           // show edit group modal
@@ -164,7 +163,7 @@ const UIManager = (dataAPI, store) => {
                     {
                       tag: "button",
                       textContent: "Remove",
-                      className: css["group-text-btn"],
+                      className: css["text-btn"],
                       on: {
                         click: () => {
                           // check if there are any users in the group
@@ -208,7 +207,7 @@ const UIManager = (dataAPI, store) => {
   modalManager.register("gistSettings", (props, store) => {
     return createElement({
       tag: "form",
-      className: css["groups-form"],
+      className: css["xgroups"],
       on: {
         submit: async (e) => {
           e.preventDefault();
@@ -338,7 +337,7 @@ const UIManager = (dataAPI, store) => {
   modalManager.register("importData", (props, store) =>
     createElement({
       tag: "form",
-      className: css["groups-form"],
+      className: css["xgroups"],
       on: {
         submit: (e) => {
           e.preventDefault();
@@ -378,10 +377,15 @@ const UIManager = (dataAPI, store) => {
   modalManager.register("editGroup", ({ group }, store) =>
     createElement({
       tag: "form",
-      className: css["groups-form"],
+      className: css["xgroups"],
       on: {
         submit: (e) => {
           e.preventDefault();
+          // if submitted with cancel button, close modal
+          if (e.submitter.name === "cancel") {
+            modalManager.close();
+            return;
+          }
           const name = e.target.elements.name.value;
           const description = e.target.elements.description.value;
           const bgColor = e.target.elements.bgColor.value;
@@ -441,9 +445,6 @@ const UIManager = (dataAPI, store) => {
               name: "cancel",
               className: css["group-btn"],
               textContent: "Cancel",
-              on: {
-                click: () => modalManager.close(),
-              },
             },
             {
               tag: "button",
@@ -461,7 +462,7 @@ const UIManager = (dataAPI, store) => {
   modalManager.register("addGroup", (props, store) =>
     createElement({
       tag: "form",
-      className: css["groups-form"],
+      className: css["xgroups"],
       on: {
         submit: (e) => {
           e.preventDefault();
@@ -521,9 +522,6 @@ const UIManager = (dataAPI, store) => {
               name: "cancel",
               className: css["group-btn"],
               textContent: "Cancel",
-              on: {
-                click: () => modalManager.close(),
-              },
             },
             {
               tag: "button",
@@ -540,7 +538,7 @@ const UIManager = (dataAPI, store) => {
   modalManager.register("groupUsers", (props, store) =>
     createElement({
       tag: "div",
-      className: css["groups-form"],
+      className: css["xgroups"],
       children: [
         {
           tag: "div",
@@ -560,7 +558,7 @@ const UIManager = (dataAPI, store) => {
               {
                 tag: "button",
                 textContent: "Remove",
-                className: css["group-text-btn"],
+                className: css["text-btn"],
                 on: {
                   click: () => {
                     dataAPI.removeUserFromGroup(username, props.groupName);
@@ -570,6 +568,23 @@ const UIManager = (dataAPI, store) => {
             ],
           })),
         },
+        {
+          className: css["form-footer"],
+          children: [
+            {
+              tag: "button",
+              type: "submit",
+              name: "close",
+              className: css["group-btn"],
+              textContent: "Close",
+              on: {
+                click: () => {
+                  modalManager.close();
+                },
+              },
+            },
+          ],
+        },
       ],
     })
   );
@@ -577,7 +592,7 @@ const UIManager = (dataAPI, store) => {
   modalManager.register("assignUser", ({ username }, store) =>
     createElement({
       tag: "form",
-      className: css["groups-form"],
+      className: css["xgroups"],
       on: {
         submit: (e) => {
           e.preventDefault();
@@ -662,7 +677,7 @@ const UIManager = (dataAPI, store) => {
   modalManager.register("removeUser", ({ username }, store) =>
     createElement({
       tag: "form",
-      className: css["groups-form"],
+      className: css["xgroups"],
       on: {
         submit: (e) => {
           e.preventDefault();
@@ -737,7 +752,7 @@ const UIManager = (dataAPI, store) => {
       const { username } = this.props;
       const groups = dataAPI.getUserGroups(username);
       return createElement({
-        className: css["group-tags"],
+        className: classnames(css["xgroups"], css["group-tags"]),
         children: [
           ...groups.map((groupName) => {
             const group = this.store
@@ -759,7 +774,8 @@ const UIManager = (dataAPI, store) => {
                     title: `Users in Group: ${group.name}`,
                     subtitle: createElement({
                       tag: "button",
-                      textContent: "Edit",
+                      textContent: "Edit group...",
+                      className: css["text-btn"],
                       on: {
                         click: () =>
                           modalManager.open("editGroup", {
@@ -767,8 +783,6 @@ const UIManager = (dataAPI, store) => {
                             title: "Edit Group",
                           }),
                       },
-                      style: { cursor: "pointer" },
-                      className: css["group-tag-edit"],
                     }),
                   }),
               },
@@ -894,6 +908,7 @@ export class XGroups {
       groups: [],
       userGroups: {},
       modalsStack: [],
+      loading: false,
     });
     this.dataAPI = DataAPI(this.store);
     this.uiManager = UIManager(this.dataAPI, this.store);

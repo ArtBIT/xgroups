@@ -1,3 +1,4 @@
+import { classnames } from "../../utils.js";
 import { createElement, nextTick } from "../utils.js";
 import { Component } from "./component.js";
 
@@ -7,21 +8,25 @@ import css from "../../xgroups.module.css";
  */
 export class Modal extends Component {
   render() {
-    const { title, subtitle, children, onClose } = this.props;
+    const { title, subtitle, template, onClose, active } = this.props;
     return createElement({
       tag: "div",
-      className: css["modal-overlay"],
+      className: classnames(
+        css["xgroups"],
+        css["modal-overlay"],
+        active && css["active"]
+      ),
       on: {
         keydown: (e) => e.key === "Escape" && onClose(),
       },
       children: [
         {
           tag: "div",
-          className: css["modal-window"],
+          className: classnames(css["modal-window"]),
           children: [
             {
               tag: "div",
-              className: css["groups-form"],
+              className: css["xgroups"],
               role: "dialog",
               "aria-modal": "true",
               style: { position: "relative" },
@@ -52,7 +57,7 @@ export class Modal extends Component {
                 {
                   tag: "div",
                   className: css["modal-content"],
-                  children,
+                  children: [template?.(this.props, this.store)],
                 },
                 {
                   tag: "button",
@@ -77,16 +82,18 @@ export class Modal extends Component {
 
   mount(container) {
     super.mount(container);
-    nextTick(() => {
-      this.element.classList.add(css["active"]);
-    });
+    if (!this.props.active) {
+      nextTick(() => {
+        this.setProps({ active: true });
+      });
+    }
 
     this.element.focus();
   }
   unmount() {
     if (!this.element) return;
     // Trigger closing animation before removing
-    this.element.classList.remove(css["active"]);
+    this.setProps({ active: false });
     setTimeout(super.unmount.bind(this), 200);
   }
 }

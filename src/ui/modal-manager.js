@@ -41,17 +41,19 @@ export const ModalManager = (store) => {
   const open = (name, props = {}) => {
     const template = modals.get(name);
     if (!template) throw new Error(`Modal ${name} not registered`);
-    const content = template(props, store);
     const modal = new Modal(
       {
         ...props,
         modalName: name,
-        children: [content],
+        template: template,
         onClose: () => close(),
       },
       store
     );
     const modalsStack = store.getState().modalsStack || [];
+    modalsStack.forEach((modal) => {
+      modal.setProps({ active: false });
+    });
     modalsStack.push(modal);
     modal.mount(document.body);
     store.setState({ modalsStack });
@@ -62,14 +64,9 @@ export const ModalManager = (store) => {
     const { modalsStack } = state;
     if (modalsStack.length) {
       const activeModal = modalsStack[modalsStack.length - 1];
-      // re-render the template and replace the modal content
-      const template = modals.get(activeModal.props.modalName);
-      const content = template(activeModal.props, store);
-      activeModal.props.children = [content];
-      activeModal.element.classList.remove(css["active"]);
-      activeModal.update();
+      if (activeModal.props.active) return;
       nextTick(() => {
-        activeModal.element.classList.add(css["active"]);
+        activeModal.setProps({ active: true });
       });
     }
   });
