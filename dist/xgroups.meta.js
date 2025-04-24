@@ -5,7 +5,7 @@
 // @author       Djordje Ungar
 // @copyright    2025+ Djordje Ungar
 // @license      MIT
-// @version      1.0.86
+// @version      1.0.87
 // @source       https://github.com/artbit/xgroups
 // @homepageURL  https://github.com/artbit/xgroups
 // @supportURL   https://github.com/artbit/xgroups/issues
