@@ -3,7 +3,7 @@ const path = require("path");
 
 const packageJsonPath = path.join(__dirname, "package.json");
 const packageJson = require(packageJsonPath);
-const headerFile = path.join(__dirname, "tampermonkey-header.js");
+const headerFile = path.join(__dirname, "userscript-header.js");
 const inputFile = path.join(__dirname, "dist", "xgroups.min.js");
 const metaFile = path.join(__dirname, "dist", "xgroups.meta.js");
 const outputFile = path.join(__dirname, "dist", "xgroups.userscript.js");
@@ -45,7 +45,7 @@ fs.readFile(headerFile, "utf8", (err, header) => {
     const output = `${header}\n${script}`;
     fs.writeFile(outputFile, output, (err) => {
       if (err) throw err;
-      console.log("TamperMonkey script built: ", outputFile);
+      console.log("UserScript script built: ", outputFile);
     });
   });
 });

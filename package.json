@@ -3,10 +3,10 @@
   "version": "1.0.86",
   "scripts": {
     "dev": "vite",
-    "build": "npm run build-vite && npm run build-minify && npm run build-tampermonkey",
-    "build-dev": "npm run build-vite && cp dist/xgroups.iife.js dist/xgroups.min.js && npm run build-tampermonkey",
+    "build": "npm run build-vite && npm run build-minify && npm run build-userscript",
+    "build-dev": "npm run build-vite && cp dist/xgroups.iife.js dist/xgroups.min.js && npm run build-userscript",
     "build-vite": "vite build",
-    "build-tampermonkey": "node build-tampermonkey.js",
+    "build-userscript": "node build-userscript.js",
     "build-minify": "uglifyjs dist/xgroups.iife.js -o dist/xgroups.min.js --compress --mangle --comments",
     "clean": "rimraf dist"
   },
