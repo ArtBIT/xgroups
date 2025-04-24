@@ -5,9 +5,11 @@
 // @author       Djordje Ungar
 // @copyright    2025+ Djordje Ungar
 // @license      MIT
-// @version      1.0.85
+// @version      1.0.86
 // @source       https://github.com/artbit/xgroups
-// @updateURL    https://raw.githubusercontent.com/ArtBIT/xgroups/refs/heads/main/dist/xgroups.userscript.js
+// @homepageURL  https://github.com/artbit/xgroups
+// @supportURL   https://github.com/artbit/xgroups/issues
+// @updateURL    https://raw.githubusercontent.com/ArtBIT/xgroups/refs/heads/main/dist/xgroups.meta.js
 // @downloadURL  https://raw.githubusercontent.com/ArtBIT/xgroups/refs/heads/main/dist/xgroups.userscript.js
 // @match        https://x.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=x.com

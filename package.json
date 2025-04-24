@@ -1,6 +1,6 @@
 {
   "name": "xgroups",
-  "version": "1.0.85",
+  "version": "1.0.86",
   "scripts": {
     "dev": "vite",
     "build": "npm run build-vite && npm run build-minify && npm run build-tampermonkey",

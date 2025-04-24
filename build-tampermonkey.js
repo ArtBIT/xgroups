@@ -5,6 +5,7 @@ const packageJsonPath = path.join(__dirname, "package.json");
 const packageJson = require(packageJsonPath);
 const headerFile = path.join(__dirname, "tampermonkey-header.js");
 const inputFile = path.join(__dirname, "dist", "xgroups.min.js");
+const metaFile = path.join(__dirname, "dist", "xgroups.meta.js");
 const outputFile = path.join(__dirname, "dist", "xgroups.userscript.js");
 
 const bumpVersion = (version) => {
@@ -33,6 +34,12 @@ fs.readFile(headerFile, "utf8", (err, header) => {
     /@version\s+\d+\.\d+\.\d+/,
     `@version      ${packageJson.version}`
   );
+
+  fs.writeFile(metaFile, header, (err) => {
+    if (err) throw err;
+    console.log("Saved meta file to: ", metaFile);
+  });
+
   fs.readFile(inputFile, "utf8", (err, script) => {
     if (err) throw err;
     const output = `${header}\n${script}`;
