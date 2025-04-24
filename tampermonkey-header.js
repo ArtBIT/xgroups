@@ -4,6 +4,7 @@
 // @namespace    https://github.com/artbit/xgroups
 // @author       Djordje Ungar
 // @copyright    2025+ Djordje Ungar
+// @license      MIT
 // @version      1.0.0
 // @source       https://github.com/artbit/xgroups
 // @updateURL    https://raw.githubusercontent.com/ArtBIT/xgroups/refs/heads/main/dist/xgroups.userscript.js
@@ -17,3 +18,7 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_notification
 // ==/UserScript==
+
+// ==OpenUserJS==
+// @author       artbit
+// ==/OpenUserJS==
