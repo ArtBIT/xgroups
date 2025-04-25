@@ -1,39 +1,79 @@
 import { Component } from "./components/component.js";
 /**
  * Creates a DOM element with attributes and children.
+ * Supports SVG elements and namespaced attributes like xlink:href.
  * @param {Object} props - Component properties
- * @returns {HTMLElement} Created DOM element
+ * @returns {HTMLElement|SVGElement} Created DOM or SVG element
  */
+export const SVGTags = [
+  "path",
+  "circle",
+  "rect",
+  "line",
+  "ellipse",
+  "g",
+  "polygon",
+  "polyline",
+  "text",
+  "use",
+  "defs",
+  "symbol",
+  "clipPath",
+  "mask",
+  "pattern",
+];
+export const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+export const XLINK_NAMESPACE = "http://www.w3.org/1999/xlink";
 export const createElement = ({
   tag = "div",
   children = [],
   style = {},
   on = {},
+  element,
   ...attributes
 }) => {
-  const element = document.createElement(tag);
+  const isSVG = tag === "svg" || SVGTags.includes(tag);
+
+  element =
+    element || isSVG
+      ? document.createElementNS(SVG_NAMESPACE, tag)
+      : document.createElement(tag);
+
   Object.entries(attributes).forEach(([key, value]) => {
-    if (key === "className") element.className = value;
-    else if (key === "textContent") element.textContent = value;
-    else if (key === "innerHTML") element.innerHTML = value;
-    else element.setAttribute(key, value);
+    if (key === "className") {
+      element.setAttribute("class", value);
+    } else if (key === "textContent") {
+      element.textContent = value;
+    } else if (key === "innerHTML") {
+      element.innerHTML = value;
+    } else if (key === "xlink:href") {
+      element.setAttributeNS(XLINK_NAMESPACE, "xlink:href", value);
+    } else {
+      element.setAttribute(key, value);
+    }
   });
+
   Object.entries(style).forEach(([key, value]) => {
     element.style[key] = value;
   });
+
   Object.entries(on).forEach(([event, handler]) => {
     element.addEventListener(event, handler);
   });
+
   children.forEach((child) => {
     if (!child) return;
     if (typeof child === "string") {
       element.appendChild(document.createTextNode(child));
-    } else if (child instanceof HTMLElement) {
+    } else if (child instanceof Node) {
       element.appendChild(child);
     } else if (child instanceof Component) {
       child.mount(element);
-    } else element.appendChild(createElement(child));
+    } else {
+      element.appendChild(createElement(child));
+    }
   });
+
   return element;
 };
 

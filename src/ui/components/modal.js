@@ -1,6 +1,7 @@
 import { classnames } from "../../utils.js";
 import { createElement, nextTick } from "../utils.js";
 import { Component } from "./component.js";
+import { SVGButton } from "./svg-button.js";
 
 import css from "../../xgroups.module.css";
 /**
@@ -59,19 +60,15 @@ export class Modal extends Component {
                   className: css["modal-content"],
                   children: [template?.(this.props, this.store)],
                 },
-                {
-                  tag: "button",
-                  textContent: "✖️",
-                  "aria-label": "Close modal",
-                  style: {
-                    position: "absolute",
-                    top: "10px",
-                    right: "10px",
-                  },
+                new SVGButton({
+                  icon: "close",
+                  className: css["modal-close"],
+                  iconClassName: css["modal-close-icon"],
+                  title: "Close modal",
                   on: {
                     click: onClose,
                   },
-                },
+                }),
               ],
             },
           ],

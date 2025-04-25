@@ -1,23 +1,30 @@
+import { classnames } from "../../utils.js";
 import { createElement } from "../utils.js";
 import { Component } from "./component.js";
+import { SVGIcon } from "./svg-icon.js";
 
 import css from "../../xgroups.module.css";
 
 export class SVGButton extends Component {
   render() {
-    const { svg, label = "", ariaLabel, ...props } = this.props;
+    const { icon, label = "", ariaLabel, ...props } = this.props;
 
     return createElement({
       ...props,
       tag: "div",
       role: "button",
-      className: css["xgroups-svg-btn"],
+      className: classnames(
+        css["svg-btn"],
+        css["xgroups-svg-btn"],
+        props.className
+      ),
       "aria-label": ariaLabel || label,
       children: [
-        {
-          tag: "div",
-          innerHTML: svg,
-        },
+        new SVGIcon({
+          icon,
+          title: ariaLabel || label,
+          className: props.iconClassName,
+        }),
         label && {
           tag: "span",
           textContent: label,

@@ -1,6 +1,5 @@
 import { config } from "./config.js";
 import { debounce, classnames } from "./utils.js";
-import { SVG } from "./svg.js";
 import { Store } from "./store.js";
 import { DataAPI } from "./api/data.js";
 import {
@@ -9,6 +8,7 @@ import {
   FormInput,
   Dropdown,
   SVGButton,
+  SVGIcon,
   ModalManager,
   LoadingSpinner,
   showNotification,
@@ -43,17 +43,13 @@ const UIManager = (dataAPI, store) => {
       className: css["xgroups"],
       children: [
         {
-          style: {
-            display: "flex",
-            alignItems: "flex-start",
-          },
+          className: css["settings-btns"],
           // import/export/gist buttons
           children: [
-            {
-              tag: "button",
+            new SVGButton({
+              icon: "import",
               title: "Import groups from JSON",
-              textContent: "Import...",
-              className: css["text-btn"],
+              className: css["settings-btn"],
               on: {
                 click: () => {
                   modalManager.open("importData", {
@@ -62,12 +58,11 @@ const UIManager = (dataAPI, store) => {
                   });
                 },
               },
-            },
-            {
-              tag: "button",
+            }),
+            new SVGButton({
+              icon: "export",
               title: "Export groups to JSON",
-              textContent: "Export",
-              className: css["text-btn"],
+              className: css["settings-btn"],
               on: {
                 click: () => {
                   const data = JSON.stringify(dataAPI.getLocalData());
@@ -87,12 +82,11 @@ const UIManager = (dataAPI, store) => {
                   URL.revokeObjectURL(url);
                 },
               },
-            },
-            {
-              tag: "button",
+            }),
+            new SVGButton({
+              icon: "sync",
               title: "Sync with Gist",
-              textContent: "Sync...",
-              className: css["text-btn"],
+              className: css["settings-btn"],
               on: {
                 click: () => {
                   modalManager.open("gistSettings", {
@@ -100,19 +94,19 @@ const UIManager = (dataAPI, store) => {
                   });
                 },
               },
-            },
+            }),
           ],
         },
         {
           tag: "div",
+          className: css["list"],
           style: {
-            overflowY: "auto",
             maxHeight: "300px",
           },
           children: [
             ...store.getState().groups.map((group) => ({
               tag: "div",
-              className: css["group-item"],
+              className: css["list-item"],
               children: [
                 {
                   tag: "button",
@@ -144,15 +138,12 @@ const UIManager = (dataAPI, store) => {
                 },
                 {
                   tag: "div",
-                  style: {
-                    display: "inline-flex",
-                    gap: "5px",
-                  },
+                  className: css["list-item-btns"],
                   children: [
-                    {
-                      tag: "button",
-                      textContent: "Edit",
-                      className: css["text-btn"],
+                    new SVGButton({
+                      icon: "pencil",
+                      title: "Edit group",
+                      className: css["icon-btn"],
                       on: {
                         click: () => {
                           // show edit group modal
@@ -162,12 +153,11 @@ const UIManager = (dataAPI, store) => {
                           });
                         },
                       },
-                    },
-                    {
-                      tag: "button",
-                      textContent: "Remove",
-                      className: css["text-btn"],
+                    }),
+                    new SVGButton({
+                      icon: "trash",
                       title: "Remove group",
+                      className: css["icon-btn"],
                       on: {
                         click: () => {
                           // check if there are any users in the group
@@ -184,7 +174,7 @@ const UIManager = (dataAPI, store) => {
                           dataAPI.removeGroup(group.name);
                         },
                       },
-                    },
+                    }),
                   ],
                 },
               ],
@@ -194,7 +184,7 @@ const UIManager = (dataAPI, store) => {
         {
           tag: "button",
           textContent: "Add Group",
-          className: css["group-btn"],
+          className: css["form-btn"],
           on: {
             click: () => {
               // show add group modal
@@ -297,21 +287,21 @@ const UIManager = (dataAPI, store) => {
               tag: "button",
               type: "submit",
               name: "cancel",
-              className: css["group-btn"],
+              className: css["form-btn"],
               textContent: "Cancel",
             },
             {
               tag: "button",
               type: "submit",
               name: "save",
-              className: css["group-btn"],
+              className: css["form-btn"],
               textContent: "Save",
             },
             {
               tag: "button",
               type: "button",
               name: "sync",
-              className: css["group-btn"],
+              className: css["form-btn"],
               textContent: "Sync Now",
               on: {
                 click: async () => {
@@ -371,7 +361,7 @@ const UIManager = (dataAPI, store) => {
         {
           tag: "button",
           textContent: "Import",
-          className: css["group-btn"],
+          className: css["form-btn"],
           type: "submit",
         },
       ],
@@ -447,14 +437,14 @@ const UIManager = (dataAPI, store) => {
               tag: "button",
               type: "submit",
               name: "cancel",
-              className: css["group-btn"],
+              className: css["form-btn"],
               textContent: "Cancel",
             },
             {
               tag: "button",
               type: "submit",
               name: "save",
-              className: css["group-btn"],
+              className: css["form-btn"],
               textContent: "Save Changes",
             },
           ],
@@ -524,14 +514,14 @@ const UIManager = (dataAPI, store) => {
               tag: "button",
               type: "submit",
               name: "cancel",
-              className: css["group-btn"],
+              className: css["form-btn"],
               textContent: "Cancel",
             },
             {
               tag: "button",
               type: "submit",
               name: "addGroup",
-              className: css["group-btn"],
+              className: css["form-btn"],
               textContent: "Add Group",
             },
           ],
@@ -546,11 +536,11 @@ const UIManager = (dataAPI, store) => {
       children: [
         {
           tag: "div",
-          className: css["group-users-list"],
-          style: { overflowY: "auto", maxHeight: "300px" },
+          className: css["list"],
+          style: { maxHeight: "300px" },
           children: dataAPI.getGroupUsers(props.groupName).map((username) => ({
             tag: "div",
-            className: css["group-item"],
+            className: css["list-item"],
             children: [
               {
                 tag: "a",
@@ -559,17 +549,16 @@ const UIManager = (dataAPI, store) => {
                 target: "_blank",
               },
               // remove user from group button
-              {
-                tag: "button",
-                textContent: "Remove",
-                className: css["text-btn"],
+              new SVGButton({
+                icon: "trash",
+                className: css["icon-btn"],
                 title: "Remove user from group",
                 on: {
                   click: () => {
                     dataAPI.removeUserFromGroup(username, props.groupName);
                   },
                 },
-              },
+              }),
             ],
           })),
         },
@@ -580,7 +569,7 @@ const UIManager = (dataAPI, store) => {
               tag: "button",
               type: "submit",
               name: "close",
-              className: css["group-btn"],
+              className: css["form-btn"],
               textContent: "Close",
               on: {
                 click: () => {
@@ -663,14 +652,14 @@ const UIManager = (dataAPI, store) => {
               tag: "button",
               type: "submit",
               name: "cancel",
-              className: css["group-btn"],
+              className: css["form-btn"],
               textContent: "Cancel",
             },
             {
               tag: "button",
               type: "submit",
               name: "assign",
-              className: css["group-btn"],
+              className: css["form-btn"],
               textContent: "Assign",
             },
           ],
@@ -733,7 +722,7 @@ const UIManager = (dataAPI, store) => {
               tag: "button",
               type: "submit",
               name: "cancel",
-              className: css["group-btn"],
+              className: css["form-btn"],
               textContent: "Cancel",
             },
             {
@@ -741,7 +730,7 @@ const UIManager = (dataAPI, store) => {
               type: "submit",
               name: "remove",
               title: "Remove user from group",
-              className: css["group-btn"],
+              className: css["form-btn"],
               textContent: "Remove",
             },
           ],
@@ -797,11 +786,10 @@ const UIManager = (dataAPI, store) => {
           {
             className: css["group-tags-btns"],
             children: [
-              {
-                tag: "button",
-                textContent: "+",
-                textContent: "➕",
+              new SVGButton({
+                icon: "userPlus",
                 title: "Add user to group",
+                iconClassName: css["group-tags-btn"],
                 "aria-label": "Add user to group",
                 on: {
                   click: () =>
@@ -810,12 +798,11 @@ const UIManager = (dataAPI, store) => {
                       title: "Add to Group",
                     }),
                 },
-              },
-              {
-                tag: "button",
-                textContent: "-",
-                textContent: "➖",
+              }),
+              new SVGButton({
+                icon: "userMinus",
                 title: "Remove user from group",
+                iconClassName: css["group-tags-btn"],
                 "aria-label": "- Remove user from group",
                 on: {
                   click: () =>
@@ -824,7 +811,7 @@ const UIManager = (dataAPI, store) => {
                       title: "Remove User from Group",
                     }),
                 },
-              },
+              }),
             ],
           },
         ],
@@ -866,28 +853,34 @@ const UIManager = (dataAPI, store) => {
    * Initializes the group manager button.
    */
   const initGroupManager = () => {
-    const button = new SVGButton(
-      {
-        title: "Manage XGroups",
-        svg: SVG.groups,
-        style: {
-          position: "fixed",
-          top: "10px",
-          right: "10px",
-          width: "24px",
-          height: "24px",
-          zIndex: 1001,
-        },
-        on: {
-          click: () =>
-            modalManager.open("groupManager", {
-              title: "Manage Groups",
-            }),
-        },
-      },
-      store
-    );
-    button.mount(document.body);
+    const button = createElement({
+      className: css["xgroups"],
+      children: [
+        new SVGButton(
+          {
+            title: "Manage XGroups",
+            icon: "groups",
+            className: css["icon-btn"],
+            style: {
+              position: "fixed",
+              top: "10px",
+              right: "10px",
+              width: "24px",
+              height: "24px",
+              zIndex: 1001,
+            },
+            on: {
+              click: () =>
+                modalManager.open("groupManager", {
+                  title: "Manage Groups",
+                }),
+            },
+          },
+          store
+        ),
+      ],
+    });
+    document.body.appendChild(button);
   };
 
   // Initialize

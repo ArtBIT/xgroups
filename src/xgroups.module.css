@@ -1,15 +1,18 @@
 :root {
   --xgroups-background-primary: #0f1419;
   --xgroups-background-secondary: #30383f;
+  --xgroups-background-darken: rgba(0, 0, 0, 0.5);
+  --xgroups-background-lighten: rgba(255, 255, 255, 0.1);
   --xgroups-typography-primary: #eee;
-  --xgroups-typography-secondary: #ccc;
+  --xgroups-typography-secondary: #bbb;
   --xgroups-typography-inverted: #000;
   --xgroups-ui-primary: #eff3f4;
+  --xgroups-ui-primary-dimen: #bbb;
   --xgroups-border-radius: 24px;
 }
 .xgroups .form-element {
   position: relative;
-  margin-top: 28px;
+  margin-top: 24px;
 }
 .xgroups .form-input {
   background: var(--xgroups-background-secondary);
@@ -22,13 +25,6 @@
 }
 .xgroups .group-circle-btn:hover {
   background: var(--xgroups-background-secondary);
-}
-.xgroups-svg-btn {
-  fill: var(--xgroups-typography-secondary);
-  transition: fill 200ms;
-}
-.xgroups-svg-btn:hover {
-  fill: var(--xgroups-typography-primary);
 }
 .xgroups.group-tags {
   margin-top: 5px;
@@ -45,27 +41,98 @@
 }
 .xgroups .group-tags-btns {
   gap: 5px;
-  /* add gradient fallof from the top */
-  background: linear-gradient(
-    to bottom,
-    var(--xgroups-background-primary) 0%,
-    rgba(0, 0, 0, 0) 100%
-  );
   padding-top: 5px;
   margin-top: 5px;
   visibility: hidden;
+  display: flex;
 }
 article[data-testid="tweet"]:hover .group-tags-btns {
   visibility: visible;
 }
-.xgroups .group-item {
+.xgroups .svg-btn {
+  fill: var(--xgroups-typography-secondary);
+  transition: fill 200ms;
+}
+.xgroups .svg-btn:hover {
+  fill: var(--xgroups-typography-primary);
+}
+.xgroups .icon-btn {
+  height: 14px;
+  width: 14px;
+}
+.xgroups .btn {
+  background-color: var(--xgroups-ui-primary-dimen);
+  transition: background-color 200ms;
+}
+.xgroups .btn:hover {
+  background-color: var(--xgroups-ui-primary);
+}
+
+.xgroups input[type="submit"],
+.xgroups .form-btn {
+  background-color: var(--xgroups-ui-primary-dimen);
+  color: var(--xgroups-typography-inverted);
+  border-radius: 12px;
+  border: 0;
+  box-sizing: border-box;
+  cursor: pointer;
+  font-size: 14px;
+  margin: 4px;
+  padding: 8px;
+  outline: 0;
+  text-align: center;
+  transition: background-color 200ms;
+}
+.xgroups input[type="submit"]:hover,
+.xgroups .form-btn:hover {
+  background-color: var(--xgroups-ui-primary);
+}
+
+.xgroups .group-tags-btn {
+  width: 100%;
+}
+
+.xgroups .settings-btns {
+  display: flex;
+  alignitems: flex-start;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.xgroups .settings-btn {
+  width: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.xgroups .settings-btn svg {
+  height: 32px;
+}
+.xgroups .list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  margin-bottom: 8px;
+  overflow-y: auto;
+  border-radius: var(--xgroups-border-radius);
+  background: var(--xgroups-background-darken);
+}
+
+.xgroups .list-item {
   display: flex;
   gap: 8px;
+  align-items: center;
   justify-content: space-between;
-  padding: 0 8px;
+  padding: 4px 8px;
+  border-radius: var(--xgroups-border-radius);
 }
-.xgroups .group-item:hover {
+.xgroups .list-item:hover {
   background: var(--xgroups-background-secondary);
+}
+.xgroups .list-item-btns {
+  display: inline-flex;
+  gap: 16px;
 }
 
 /* MODALS */
@@ -76,7 +143,7 @@ article[data-testid="tweet"]:hover .group-tags-btns {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--xgroups-background-darken);
   z-index: 1002;
   display: flex;
   align-items: center;
@@ -86,10 +153,10 @@ article[data-testid="tweet"]:hover .group-tags-btns {
   color: var(--xgroups-typography-primary);
   background: var(--xgroups-background-primary);
   border: none;
-  padding: 15px;
+  padding: 16px;
   max-width: 400px;
   width: 100%;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0px 64px var(--xgroups-background-lighten);
   border-radius: var(--xgroups-border-radius);
 }
 .xgroups .modal-header {
@@ -113,6 +180,12 @@ article[data-testid="tweet"]:hover .group-tags-btns {
   flex-direction: column;
   gap: 10px;
 }
+.xgroups .modal-close {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 24px;
+}
 .xgroups.modal-overlay {
   opacity: 0;
   transition: opacity 200ms ease-in-out;
@@ -128,20 +201,6 @@ article[data-testid="tweet"]:hover .group-tags-btns {
   transition: transform 200ms ease-in-out;
 }
 
-.xgroups input[type="submit"],
-.xgroups .group-btn {
-  background-color: var(--xgroups-ui-primary);
-  color: var(--xgroups-typography-inverted);
-  border-radius: 12px;
-  border: 0;
-  box-sizing: border-box;
-  cursor: pointer;
-  font-size: 14px;
-  margin: 4px;
-  padding: 8px;
-  outline: 0;
-  text-align: center;
-}
 .xgroups .text-btn {
   background-color: none;
   color: var(--xgroups-typography-secondary);
@@ -179,7 +238,7 @@ article[data-testid="tweet"]:hover .group-tags-btns {
   font-family: sans-serif;
   font-size: 14px;
   font-weight: 400;
-  margin-top: 10px;
+  margin-top: 16px;
 }
 .xgroups select {
   padding: 12px;
@@ -191,14 +250,14 @@ article[data-testid="tweet"]:hover .group-tags-btns {
   font-family: sans-serif;
   font-size: 16px;
   font-weight: 600;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 .xgroups .form-element {
   min-height: 50px;
   height: auto;
   position: relative;
   width: 100%;
-  margin-top: 28px;
+  margin-top: 24px;
 }
 .xgroups .divider {
   width: 100%;
@@ -288,7 +347,7 @@ article[data-testid="tweet"]:hover .group-tags-btns {
   cursor: pointer;
   font-size: 18px;
   height: 50px;
-  margin-top: 38px;
+  margin-top: 24px;
   outline: 0;
   text-align: center;
   width: 100%;
