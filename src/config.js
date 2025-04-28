@@ -4,5 +4,6 @@ export const config = {
     '[data-testid="User-Name"] :nth-child(2) a[href^="/"][role="link"] span',
   avatarSelector: 'div[data-testid="Tweet-User-Avatar"]',
 };
+export const jsonFormatVersion = 1;
 
 export default config;

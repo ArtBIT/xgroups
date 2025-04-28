@@ -1,5 +1,6 @@
 import { GistAPI } from "./gist.js";
 import { showNotification } from "../ui/utils.js";
+import { jsonFormatVersion } from "../config.js";
 
 // DataAPI: Handles localStorage and group management
 /**
@@ -11,11 +12,19 @@ export const DataAPI = (store) => {
   const GROUPS_KEY = "xgroups_groups";
   const USER_GROUPS_KEY = "xgroups_user_groups";
   const TIMESTAMP_KEY = "xgroups_data_timestamp";
+  const NEXT_ID_KEY = "xgroups_next_id";
 
   let localStorageCache = {
     groups: null,
     userGroups: null,
     timestamp: null,
+  };
+
+  // Get and increment next ID for groups
+  const getNextId = () => {
+    const nextId = parseInt(GM_getValue(NEXT_ID_KEY, "1"), 10);
+    GM_setValue(NEXT_ID_KEY, (nextId + 1).toString());
+    return nextId;
   };
 
   /**
@@ -25,8 +34,7 @@ export const DataAPI = (store) => {
     try {
       const groups = store.getState().groups;
       if (JSON.stringify(groups) !== JSON.stringify(localStorageCache.groups)) {
-        // only store value if it has changed
-        GM_setValue(GROUPS_KEY, JSON.stringify(groups));
+        GM_setValue(GROUPS_KEY, groups);
         updateTimestamp();
         localStorageCache.groups = groups;
       }
@@ -58,8 +66,9 @@ export const DataAPI = (store) => {
    */
   const loadGroups = () => {
     try {
-      const loaded = JSON.parse(GM_getValue(GROUPS_KEY, "[]")) || [];
+      const loaded = GM_getValue(GROUPS_KEY, []);
       return loaded.map((group) => ({
+        id: group.id || getNextId(), // Assign sequential ID if not present (for backward compatibility)
         name: group.name,
         bgColor: group.bgColor || "#777",
         fgColor: group.fgColor || "#fff",
@@ -72,15 +81,17 @@ export const DataAPI = (store) => {
   };
 
   const getLocalData = () => {
-    const groups = store.getState().groups;
+    const state = store.getState();
+    const groups = state.groups;
     const userGroups = Object.fromEntries(
-      Object.entries(store.getState().userGroups).map(([username, groups]) => [
+      Object.entries(state.userGroups).map(([username, groupIds]) => [
         username,
-        Array.from(groups),
+        Array.from(groupIds),
       ])
     );
     const timestamp = getTimestamp();
-    return { groups, userGroups, timestamp };
+    const formatVersion = jsonFormatVersion;
+    return { groups, userGroups, timestamp, formatVersion };
   };
 
   const importData = (jsonData) => {
@@ -89,39 +100,36 @@ export const DataAPI = (store) => {
       if (!data.groups || !data.userGroups) {
         throw new Error("Invalid JSON format");
       }
-      const groups = store.getState().groups;
-      const userGroups = store.getState().userGroups;
-      // Merge groups (avoid duplicates)
-      const newGroups = data.groups.filter(
-        (newGroup) => !groups.some((g) => g.name === newGroup.name)
-      );
-      store.setState({
-        groups: [
-          ...groups,
-          ...newGroups.map((group) => ({
-            name: group.name,
-            bgColor: group.bgColor || "#777",
-            fgColor: group.fgColor || "#fff",
-            description: group.description || "",
-          })),
-        ],
-      });
-      // Merge userGroups
+      const groups = data.groups.map((group) => ({
+        id: parseInt(group.id),
+        name: group.name,
+        bgColor: group.bgColor || "#000",
+        fgColor: group.fgColor || "#fff",
+        description: group.description || "",
+      }));
+      const userGroups = {};
       Object.keys(data.userGroups).forEach((username) => {
         const normalized = normalizeUsername(username);
-        if (!userGroups[normalized]) {
-          userGroups[normalized] = new Set();
-        }
-        data.userGroups[username].forEach((group) => {
-          if (store.getState().groups.some((g) => g.name === group)) {
-            userGroups[normalized].add(group);
+        const groupIds = new Set();
+        data.userGroups[username].forEach((groupIdentifier) => {
+          // Handle both old (name) and new (id) formats
+          const id = parseInt(groupIdentifier);
+          const group = groups.find((g) => g.id === id);
+          if (group) {
+            groupIds.add(group.id);
           }
         });
-        if (userGroups[normalized].size === 0) {
-          delete userGroups[normalized];
+        if (groupIds.size > 0) {
+          userGroups[normalized] = groupIds;
         }
       });
-      store.setState({ userGroups: { ...userGroups } });
+      store.setState({
+        groups,
+        userGroups,
+      });
+      // Update next ID based on loaded groups
+      const maxId = Math.max(...groups.map((g) => parseInt(g.id) || 0), 0);
+      GM_setValue(NEXT_ID_KEY, (maxId + 1).toString());
       updateTimestamp();
       saveUserGroups();
       saveGroups();
@@ -139,12 +147,19 @@ export const DataAPI = (store) => {
    */
   const loadUserGroups = () => {
     try {
-      const users = JSON.parse(GM_getValue(USER_GROUPS_KEY, "{}")) || {};
+      const users = GM_getValue(USER_GROUPS_KEY, {});
+      const groups = store.getState().groups;
       return Object.fromEntries(
-        Object.entries(users).map(([username, groups]) => [
-          username,
-          new Set(groups),
-        ])
+        Object.entries(users).map(([username, groupIdentifiers]) => {
+          // Convert group names to IDs for backward compatibility
+          const groupIds = groupIdentifiers
+            .map((identifier) => {
+              const group = groups.find((g) => g.id === parseInt(identifier));
+              return group ? group.id : null;
+            })
+            .filter((id) => id !== null);
+          return [username, new Set(groupIds)];
+        })
       );
     } catch (e) {
       console.error("Failed to load user groups:", e);
@@ -155,22 +170,22 @@ export const DataAPI = (store) => {
   /**
    * Saves user-group mappings to localStorage.
    */
-
   const saveUserGroups = () => {
-    const users = Object.fromEntries(
-      Object.entries(store.getState().userGroups).map(([username, groups]) => [
-        username,
-        Array.from(groups),
-      ])
-    );
+    const users = store.getState().userGroups;
     try {
       if (
         JSON.stringify(users) !== JSON.stringify(localStorageCache.userGroups)
       ) {
-        // only store value if it has changed
-        GM_setValue(USER_GROUPS_KEY, JSON.stringify(users));
+        // convert Set to array for storage
+        const userGroups = Object.fromEntries(
+          Object.entries(users).map(([username, groupIds]) => [
+            username,
+            Array.from(groupIds),
+          ])
+        );
+        GM_setValue(USER_GROUPS_KEY, userGroups);
         updateTimestamp();
-        localStorageCache.userGroups = users;
+        localStorageCache.userGroups = { ...users };
       }
     } catch (e) {
       console.error("Failed to save user groups:", e);
@@ -181,6 +196,8 @@ export const DataAPI = (store) => {
   // Initialize store with data
   store.setState({
     groups: loadGroups(),
+  });
+  store.setState({
     userGroups: loadUserGroups(),
   });
 
@@ -201,33 +218,55 @@ export const DataAPI = (store) => {
       return await retry(async () => {
         const localData = getLocalData();
         const localTimestamp = parseInt(localData.timestamp || "0", 10);
-        const gistData = await GistAPI.readGist(GistAPI.getGistId());
+        const gistId = GistAPI.getGistId();
+        const gistData = await GistAPI.readGist(gistId);
         const gistTimestamp = parseInt(gistData.timestamp || "0", 10);
 
         if (gistTimestamp > localTimestamp) {
-          // Gist is newer, update local
-          store.setState({
-            groups: gistData.groups,
-            userGroups: Object.fromEntries(
-              Object.entries(gistData.userGroups).map(([username, groups]) => [
-                username,
-                new Set(groups),
-              ])
-            ),
+          // Gist is newer, overwrite local data
+          const groups = gistData.groups.map((group) => ({
+            id: group.id || getNextId(),
+            name: group.name,
+            bgColor: group.bgColor || "#000",
+            fgColor: group.fgColor || "#fff",
+            description: group.description || "",
+          }));
+          const userGroups = {};
+          Object.keys(gistData.userGroups).forEach((username) => {
+            const normalized = normalizeUsername(username);
+            const groupIds = new Set();
+            gistData.userGroups[username].forEach((groupIdentifier) => {
+              const group = groups.find(
+                (g) => g.id === groupIdentifier || g.name === groupIdentifier
+              );
+              if (group) {
+                groupIds.add(group.id);
+              }
+            });
+            if (groupIds.size > 0) {
+              userGroups[normalized] = groupIds;
+            }
           });
+          store.setState({
+            groups,
+            userGroups,
+          });
+          // Update next ID based on loaded groups
+          const maxId = Math.max(...groups.map((g) => parseInt(g.id) || 0), 0);
+          GM_setValue(NEXT_ID_KEY, (maxId + 1).toString());
           saveGroups();
           saveUserGroups();
         } else if (localTimestamp > gistTimestamp) {
-          // Local is newer, update Gist
-          return await GistAPI.updateGist(GistAPI.getGistId(), localData);
+          // Local is newer, overwrite Gist
+          return await GistAPI.updateGist(gistId, localData);
         }
       });
     } catch (e) {
       console.error("Failed to sync with Gist:", e);
+      showNotification({ text: "Failed to sync with Gist." });
     }
   };
 
-  // createGist should simply call GistAPI.createGist
   const createGist = async () => {
     if (!GistAPI.getToken()) {
       showNotification({ text: "Please set your Gist token in localStorage." });
@@ -237,7 +276,7 @@ export const DataAPI = (store) => {
       const data = getLocalData();
       const gistId = await GistAPI.createGist(data);
       GM_setValue("xgroups_gist_id", gistId);
-      return id;
+      return gistId;
     } catch (e) {
       console.error("Failed to create Gist:", e);
       showNotification({ text: "Failed to create Gist." });
@@ -245,43 +284,42 @@ export const DataAPI = (store) => {
   };
 
   const getGroups = () => store.getState().groups;
-  const getGroup = (name) =>
-    store.getState().groups.find((g) => g.name === name);
+  const getGroup = (id) => store.getState().groups.find((g) => g.id === id);
 
   return {
     getGroups,
     getGroup,
     addGroup: (name, description = "", bgColor = "#777", fgColor = "#fff") => {
-      const group = { name, description, bgColor, fgColor };
+      const group = { id: getNextId(), name, description, bgColor, fgColor };
       store.setState({
         groups: [...store.getState().groups, group],
       });
       saveGroups();
       return group;
     },
-    removeGroup: (name) => {
+    removeGroup: (id) => {
       // remove group from all users
       const userGroups = store.getState().userGroups;
       Object.keys(userGroups).forEach((username) => {
-        userGroups[username].delete(name);
+        userGroups[username].delete(id);
         if (userGroups[username].size === 0) delete userGroups[username];
       });
       store.setState({
-        groups: store.getState().groups.filter((g) => g.name !== name),
+        groups: store.getState().groups.filter((g) => g.id !== id),
         userGroups: { ...userGroups },
       });
       saveGroups();
       saveUserGroups();
     },
-    updateGroup: (name, newName, description, bgColor, fgColor) => {
-      if (name !== newName && getGroup(newName)) {
+    updateGroup: (id, newName, description, bgColor, fgColor) => {
+      const groups = getGroups();
+      const groupIndex = groups.findIndex((g) => g.id === id);
+      if (groupIndex === -1) return;
+
+      if (groups.some((g) => g.name === newName && g.id !== id)) {
         showNotification({ text: "Group with this name already exists." });
         return;
       }
-
-      const groups = getGroups();
-      const groupIndex = groups.findIndex((g) => g.name === name);
-      if (groupIndex === -1) return;
 
       const group = {
         ...groups[groupIndex],
@@ -293,41 +331,33 @@ export const DataAPI = (store) => {
       groups[groupIndex] = group;
       store.setState({ groups });
       saveGroups();
-      if (name !== newName) {
-        // update user groups
-        const userGroups = store.getState().userGroups;
-        Object.keys(userGroups).forEach((username) => {
-          if (userGroups[username].has(name)) {
-            userGroups[username].delete(name);
-            userGroups[username].add(newName);
-          }
-        });
-        store.setState({ userGroups: { ...userGroups } });
-        saveUserGroups();
-      }
     },
-    getUserGroups: (username) =>
-      Array.from(
+    getUserGroups: (username) => {
+      const groupIds = Array.from(
         store.getState().userGroups[normalizeUsername(username)] || []
-      ),
+      );
+      return groupIds
+        .map((id) => store.getState().groups.find((g) => g.id === id))
+        .filter(Boolean);
+    },
     getUserLink: (username) => `https://x.com/${normalizeUsername(username)}`,
-    getGroupUsers: (groupName) =>
+    getGroupUsers: (groupId) =>
       Object.keys(store.getState().userGroups).filter((username) =>
-        store.getState().userGroups[username].has(groupName)
+        store.getState().userGroups[username].has(groupId)
       ),
-    addUserToGroup: (username, group) => {
+    addUserToGroup: (username, groupId) => {
       username = normalizeUsername(username);
       const userGroups = store.getState().userGroups;
       userGroups[username] = userGroups[username] || new Set();
-      userGroups[username].add(group);
+      userGroups[username].add(groupId);
       store.setState({ userGroups: { ...userGroups } });
       saveUserGroups();
     },
-    removeUserFromGroup: (username, group) => {
+    removeUserFromGroup: (username, groupId) => {
       username = normalizeUsername(username);
       const userGroups = store.getState().userGroups;
       if (userGroups[username]) {
-        userGroups[username].delete(group);
+        userGroups[username].delete(groupId);
         if (userGroups[username].size === 0) delete userGroups[username];
         store.setState({ userGroups: { ...userGroups } });
         saveUserGroups();

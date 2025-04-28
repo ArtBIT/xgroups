@@ -111,14 +111,14 @@ const UIManager = (dataAPI, store) => {
                 {
                   tag: "button",
                   textContent: `${group.name} (${
-                    dataAPI.getGroupUsers(group.name).length
+                    dataAPI.getGroupUsers(group.id).length
                   })`,
                   title: group.description,
                   on: {
                     click: () => {
                       // show edit group modal
                       modalManager.open("groupUsers", {
-                        groupName: group.name,
+                        groupId: group.id,
                         title: `Users in Group: ${group.name}`,
                         subtitle: createElement({
                           tag: "button",
@@ -161,7 +161,7 @@ const UIManager = (dataAPI, store) => {
                       on: {
                         click: () => {
                           // check if there are any users in the group
-                          const users = dataAPI.getGroupUsers(group.name);
+                          const users = dataAPI.getGroupUsers(group.id);
                           if (users.length > 0) {
                             if (
                               !confirm(
@@ -171,7 +171,7 @@ const UIManager = (dataAPI, store) => {
                               return;
                             }
                           }
-                          dataAPI.removeGroup(group.name);
+                          dataAPI.removeGroup(group.id);
                         },
                       },
                     }),
@@ -197,6 +197,7 @@ const UIManager = (dataAPI, store) => {
       ],
     })
   );
+
   // Register Gist Settings Modal
   modalManager.register("gistSettings", (props, store) => {
     return createElement({
@@ -213,7 +214,6 @@ const UIManager = (dataAPI, store) => {
           }
           if (token) {
             GM_setValue("xgroups_gist_token", token);
-            debugger;
             if (!gistId) {
               try {
                 const id = await dataAPI.createGist();
@@ -385,8 +385,7 @@ const UIManager = (dataAPI, store) => {
           const bgColor = e.target.elements.bgColor.value;
           const fgColor = e.target.elements.fgColor.value;
           if (name) {
-            const oldName = group.name;
-            dataAPI.updateGroup(oldName, name, description, bgColor, fgColor);
+            dataAPI.updateGroup(group.id, name, description, bgColor, fgColor);
             modalManager.close();
           } else {
             showNotification({ text: "Please enter a group name." });
@@ -529,6 +528,7 @@ const UIManager = (dataAPI, store) => {
       ],
     })
   );
+
   modalManager.register("groupUsers", (props, store) =>
     createElement({
       tag: "div",
@@ -538,7 +538,7 @@ const UIManager = (dataAPI, store) => {
           tag: "div",
           className: css["list"],
           style: { maxHeight: "300px" },
-          children: dataAPI.getGroupUsers(props.groupName).map((username) => ({
+          children: dataAPI.getGroupUsers(props.groupId).map((username) => ({
             tag: "div",
             className: css["list-item"],
             children: [
@@ -555,7 +555,7 @@ const UIManager = (dataAPI, store) => {
                 title: "Remove user from group",
                 on: {
                   click: () => {
-                    dataAPI.removeUserFromGroup(username, props.groupName);
+                    dataAPI.removeUserFromGroup(username, props.groupId);
                   },
                 },
               }),
@@ -590,20 +590,21 @@ const UIManager = (dataAPI, store) => {
       on: {
         submit: (e) => {
           e.preventDefault();
-          const group = e.target.elements.group.value;
+          const isNewGroup = e.target.elements.group.value === "NEW";
+          const groupId = parseInt(e.target.elements.group.value);
           if (e.submitter.name === "cancel") {
             modalManager.close();
             return;
           }
-          if (group === "NEW") {
-            const newGroup = prompt("Enter new group name:");
-            if (newGroup) {
-              dataAPI.addGroup(newGroup);
-              dataAPI.addUserToGroup(username, newGroup);
+          if (isNewGroup) {
+            const newGroupName = prompt("Enter new group name:");
+            if (newGroupName) {
+              const newGroup = dataAPI.addGroup(newGroupName);
+              dataAPI.addUserToGroup(username, newGroup.id);
               modalManager.close();
             }
-          } else if (group) {
-            dataAPI.addUserToGroup(username, group);
+          } else if (groupId) {
+            dataAPI.addUserToGroup(username, groupId);
             modalManager.close();
           } else {
             showNotification({ text: "Please select a group." });
@@ -628,7 +629,7 @@ const UIManager = (dataAPI, store) => {
             options: [
               ...store.getState().groups.map((g) => ({
                 label: `${g.name} ${g.description}`,
-                value: g.name,
+                value: g.id,
               })),
               { label: "Create New", value: "NEW" },
             ],
@@ -675,13 +676,13 @@ const UIManager = (dataAPI, store) => {
       on: {
         submit: (e) => {
           e.preventDefault();
-          const group = e.target.elements.group.value;
+          const groupId = parseInt(e.target.elements.group.value);
           if (e.submitter.name === "cancel") {
             modalManager.close();
             return;
           }
-          if (group) {
-            dataAPI.removeUserFromGroup(username, group);
+          if (groupId) {
+            dataAPI.removeUserFromGroup(username, groupId);
             modalManager.close();
           } else {
             showNotification({ text: "Please select a group." });
@@ -703,15 +704,10 @@ const UIManager = (dataAPI, store) => {
         new Dropdown(
           {
             name: "group",
-            options: dataAPI.getUserGroups(username).map((groupName) => {
-              const group = store
-                .getState()
-                .groups.find((g) => g.name === groupName);
-              return {
-                label: `${group.name} ${group.description}`,
-                value: group.name,
-              };
-            }),
+            options: dataAPI.getUserGroups(username).map((group) => ({
+              label: `${group.name} ${group.description}`,
+              value: group.id,
+            })),
           },
           store
         ).render(),
@@ -749,11 +745,8 @@ const UIManager = (dataAPI, store) => {
       return createElement({
         className: classnames(css["xgroups"], css["group-tags"]),
         children: [
-          ...groups.map((groupName) => {
-            const group = this.store
-              .getState()
-              .groups.find((g) => g.name === groupName);
-            return createElement({
+          ...groups.map((group) =>
+            createElement({
               tag: "span",
               className: css["group-tag"],
               textContent: group.name,
@@ -765,7 +758,7 @@ const UIManager = (dataAPI, store) => {
               on: {
                 click: () =>
                   modalManager.open("groupUsers", {
-                    groupName: group.name,
+                    groupId: group.id,
                     title: `Users in Group: ${group.name}`,
                     subtitle: createElement({
                       tag: "button",
@@ -781,8 +774,8 @@ const UIManager = (dataAPI, store) => {
                     }),
                   }),
               },
-            });
-          }),
+            })
+          ),
           {
             className: css["group-tags-btns"],
             children: [

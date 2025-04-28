@@ -7,6 +7,12 @@ const headerFile = path.join(__dirname, "userscript-header.js");
 const inputFile = path.join(__dirname, "dist", "xgroups.min.js");
 const metaFile = path.join(__dirname, "dist", "xgroups.meta.js");
 const outputFile = path.join(__dirname, "dist", "xgroups.userscript.js");
+const inputFileDebug = path.join(__dirname, "dist", "xgroups.iife.js");
+const outputFileDebug = path.join(
+  __dirname,
+  "dist",
+  "xgroups-debug.userscript.js"
+);
 
 const bumpVersion = (version) => {
   const parts = version.split(".");
@@ -46,6 +52,15 @@ fs.readFile(headerFile, "utf8", (err, header) => {
     fs.writeFile(outputFile, output, (err) => {
       if (err) throw err;
       console.log("UserScript script built: ", outputFile);
+    });
+  });
+
+  fs.readFile(inputFileDebug, "utf8", (err, script) => {
+    if (err) throw err;
+    const output = `${header}\n${script}`;
+    fs.writeFile(outputFileDebug, output, (err) => {
+      if (err) throw err;
+      console.log("UserScript script built: ", outputFileDebug);
     });
   });
 });
